@@ -7,7 +7,7 @@
     
     # Add pico-sdk as a non-flake input
     pico-sdk = {
-      url = "github:raspberrypi/pico-sdk/1.5.1";
+      url = "git+https://github.com/raspberrypi/pico-sdk?ref=refs/tags/1.5.1&submodules=1";
       flake = false;
     };
   };
@@ -27,9 +27,18 @@
           nativeBuildInputs = with pkgs; [
             cmake
             gcc-arm-embedded
-            python3
             pkg-config
           ];
+
+          # Copy SDK import file to source directory before building
+          preConfigure = ''
+            # Create a writable source tree
+            cp -r ${pico-sdk} $TMPDIR/pico-sdk
+            chmod -R u+w $TMPDIR/pico-sdk
+            
+            # Copy the SDK import file to source directory
+            cp $TMPDIR/pico-sdk/external/pico_sdk_import.cmake .
+          '';
 
           # Create the build directory and build the project
           buildPhase = ''
@@ -80,7 +89,6 @@
             gcc
             gcc-arm-embedded
             gnumake
-            python3
 
             # Additional tools
             git
@@ -88,7 +96,6 @@
             usbutils
 
             # Development tools
-            gdb-multiarch
             openocd
           ];
 
