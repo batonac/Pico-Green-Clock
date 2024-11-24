@@ -1,122 +1,162 @@
 {
-  description = "Pico Green Clock - Enhanced firmware for Waveshare's Pico Green Clock";
+  description = "Pico Green Clock - A firmware for the Waveshare Pico Green Clock";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
     
-    # Add pico-sdk as a non-flake input
     pico-sdk = {
-      url = "git+https://github.com/raspberrypi/pico-sdk?ref=refs/tags/1.5.1&submodules=1";
+      url = "git+https://github.com/raspberrypi/pico-sdk?ref=refs/tags/2.0.0&submodules=1";
+      flake = false;
+    };
+
+    picotool = {
+      url = "git+https://github.com/raspberrypi/picotool.git";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, pico-sdk }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
+  outputs = { self, nixpkgs, pico-sdk, picotool }: let
+    # System types supported
+    supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+    
+    # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'
+    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+    
+    # Nixpkgs instantiated for supported system types
+    nixpkgsFor = forAllSystems (system: import nixpkgs { 
+      inherit system; 
+      config.allowUnfree = true;
+    });
+  in {
+    packages = forAllSystems (system: let
+      pkgs = nixpkgsFor.${system};
+      
+      # Common build inputs for both variants
+      commonBuildInputs = with pkgs; [
+        cmake
+        gcc-arm-embedded
+        python3
+        pkg-config
+        git
+      ];
 
-        # The main package derivation
-        pico-green-clock = pkgs.stdenv.mkDerivation {
-          pname = "pico-green-clock";
-          version = "10.01";
+      # Common CMake flags
+      commonCMakeFlags = [
+        "-DPICO_SDK_PATH=${pico-sdk}"
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+        "-DCMAKE_SYSTEM_NAME=Generic"
+        "-DCMAKE_C_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-gcc"
+        "-DCMAKE_CXX_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-g++"
+        "-DCMAKE_ASM_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-gcc"
+        "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
+        "-DFETCHCONTENT_SOURCE_DIR_PICOTOOL=${picotool}"
+      ];
 
-          src = ./.;
+      # Function to create a build derivation
+      mkPicoGreenClock = { variant, enableWifi ? false }: pkgs.stdenv.mkDerivation {
+        pname = "pico-green-clock-${variant}";
+        version = "10.01";
+        
+        src = ./.;
 
-          nativeBuildInputs = with pkgs; [
-            cmake
-            gcc-arm-embedded
-            pkg-config
-          ];
+        nativeBuildInputs = commonBuildInputs;
 
-          # Copy SDK import file to source directory before building
-          preConfigure = ''
-            # Create a writable source tree
-            cp -r ${pico-sdk} $TMPDIR/pico-sdk
-            chmod -R u+w $TMPDIR/pico-sdk
-            
-            # Copy the SDK import file to source directory
-            cp $TMPDIR/pico-sdk/external/pico_sdk_import.cmake .
-          '';
+        cmakeFlags = commonCMakeFlags ++ [
+          (if enableWifi then "-DPICO_BOARD=pico_w" else "-DPICO_BOARD=pico")
+        ];
 
-          # Create the build directory and build the project
-          buildPhase = ''
-            # Ensure build directory exists
-            mkdir -p build
-            cd build
+        # Set required environment variables
+        PICO_SDK_PATH = "${pico-sdk}";
+        CMAKE_BUILD_PARALLEL_LEVEL = "4";
 
-            # Create necessary symbolic link
-            ln -s ${pico-sdk}/external/pico_sdk_import.cmake ../pico_sdk_import.cmake
+        configurePhase = ''
+          runHook preConfigure
 
-            # Configure and build
-            export PICO_SDK_PATH=${pico-sdk}
-            cmake ..
-            make -j $NIX_BUILD_CORES
-          '';
+          # Create symbolic link for pico_sdk_import.cmake
+          ln -sf ${pico-sdk}/external/pico_sdk_import.cmake pico_sdk_import.cmake
+          
+          # Use the appropriate CMakeLists.txt based on variant
+          cp ${if enableWifi then "CMakeLists.txt.PicoW" else "CMakeLists.txt.Pico"} CMakeLists.txt
 
-          # Install the built files
-          installPhase = ''
-            mkdir -p $out/bin
-            cp Pico-Clock-Green.uf2 $out/bin/
-            cp Pico-Clock-Green.elf $out/bin/
-            
-            # Copy documentation if present
-            if [ -f ../README.md ]; then
-              mkdir -p $out/share/doc
-              cp ../README.md $out/share/doc/
-            fi
-          '';
+          # Configure with cmake
+          cmake -B build -S . ''${cmakeFlagsArray[@]} ''${cmakeFlags[@]} 
 
-          meta = with pkgs.lib; {
-            description = "Enhanced firmware for Waveshare's Pico Green Clock";
-            homepage = "https://github.com/astlouys/Pico-Green-Clock";
-            platforms = platforms.all;
-          };
+          runHook postConfigure
+        '';
+
+        buildPhase = ''
+          runHook preBuild
+
+          cmake --build build -j$CMAKE_BUILD_PARALLEL_LEVEL
+
+          runHook postBuild
+        '';
+
+        installPhase = ''
+          runHook preInstall
+          
+          mkdir -p $out/bin
+          cp build/Pico-Green-Clock.{elf,uf2} $out/bin/
+          
+          # Also copy the map file for debugging
+          cp build/Pico-Green-Clock.map $out/bin/
+          
+          runHook postInstall
+        '';
+
+        meta = with pkgs.lib; {
+          description = "Firmware for the Waveshare Pico Green Clock";
+          homepage = "https://github.com/astlouys/Pico-Green-Clock";
+          license = licenses.bsd3;
+          platforms = platforms.all;
+          maintainers = [ ];
         };
+      };
+    in {
+      # Build for regular Pico
+      pico = mkPicoGreenClock {
+        variant = "pico";
+        enableWifi = false;
+      };
 
-      in {
-        packages = {
-          inherit pico-green-clock;
-          default = pico-green-clock;
-        };
+      # Build for Pico W with WiFi
+      picow = mkPicoGreenClock {
+        variant = "picow";
+        enableWifi = true;
+      };
 
-        # Development shell
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            # Basic build tools
-            cmake
-            gcc
-            gcc-arm-embedded
-            gnumake
+      # Set the default package to the Pico W variant
+      default = self.packages.${system}.picow;
+    });
 
-            # Additional tools
-            git
-            pkg-config
-            usbutils
+    # Development shell with all required build tools
+    devShells = forAllSystems (system: let
+      pkgs = nixpkgsFor.${system};
+    in {
+      default = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          cmake
+          gcc-arm-embedded
+          python3
+          pkg-config
+          git
+          
+          # Additional development tools
+          gdb-multiarch
+          minicom
+          picotool
+        ];
 
-            # Development tools
-            openocd
-          ];
-
-          shellHook = ''
-            export PICO_SDK_PATH=${pico-sdk}
-            
-            # Create symbolic link for pico_sdk_import.cmake if it doesn't exist
-            if [ ! -f pico_sdk_import.cmake ]; then
-              ln -s $PICO_SDK_PATH/external/pico_sdk_import.cmake pico_sdk_import.cmake
-            fi
-
-            echo "Pico development environment ready!"
-            echo "PICO_SDK_PATH is set to: $PICO_SDK_PATH"
-            echo ""
-            echo "To build the project:"
-            echo "1. mkdir -p build"
-            echo "2. cd build"
-            echo "3. cmake .."
-            echo "4. make -j$NIX_BUILD_CORES"
-          '';
-        };
-      }
-    );
+        shellHook = ''
+          export PICO_SDK_PATH=${pico-sdk}
+          export CMAKE_C_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-gcc
+          export CMAKE_CXX_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-g++
+          export CMAKE_ASM_COMPILER=${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-gcc
+          export FETCHCONTENT_SOURCE_DIR_PICOTOOL=${picotool}
+          echo "Pico SDK development shell"
+          echo "SDK Path: $PICO_SDK_PATH"
+        '';
+      };
+    });
+  };
 }
