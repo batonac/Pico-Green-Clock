@@ -96,18 +96,14 @@
           runHook preInstall
           
           mkdir -p $out/bin
-          cp build/Pico-Green-Clock.{elf,uf2} $out/bin/
-          
-          # Also copy the map file for debugging
-          cp build/Pico-Green-Clock.map $out/bin/
+          cp build/Pico-Green-Clock.{elf,uf2} $out/bin/${variant}.{elf,uf2}
           
           runHook postInstall
         '';
 
         meta = with pkgs.lib; {
           description = "Firmware for the Waveshare Pico Green Clock";
-          homepage = "https://github.com/astlouys/Pico-Green-Clock";
-          license = licenses.bsd3;
+          homepage = "https://github.com/cmcornish/Pico-Green-Clock";
           platforms = platforms.all;
           maintainers = [ ];
         };
