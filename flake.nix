@@ -91,13 +91,19 @@
             sed -i '/pico_cyw43_arch\/include/d' CMakeLists.txt
             # Remove WiFi-related includes from the main C file
             sed -i '/#include.*picow_ntp_client.h/d' Pico-Green-Clock.c
+            # Comment out the manual PICO_W define for regular Pico builds
+            sed -i 's/#define PICO_W/\/\/ #define PICO_W/' Pico-Green-Clock.c
             # Comment out the makefsdata script execution since it's WiFi-related
             sed -i '/message.*makefsdata/,/^)$/s/^/# /' CMakeLists.txt
-            # Create empty html_files directory and htmldata.c to prevent missing files
+            # Create empty html_files directory and minimal htmldata.c to prevent missing files
             mkdir -p html_files
-            touch htmldata.c
-            # Comment out pico_add_extra_outputs to avoid picotool issues
-            sed -i 's/pico_add_extra_outputs/# pico_add_extra_outputs/' CMakeLists.txt
+            cat > htmldata.c << 'EOF'
+// Minimal htmldata.c stub for non-WiFi build
+static const unsigned char data_stub[] = {0};
+const struct fsdata_file file_stub[] = {{ NULL, data_stub, data_stub, sizeof(data_stub), 0}};
+#define FS_ROOT file_stub
+#define FS_NUMFILES 1
+EOF
           ''}
 
           # Configure with cmake
