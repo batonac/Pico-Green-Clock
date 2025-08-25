@@ -94,7 +94,11 @@
             # Comment out the manual PICO_W define for regular Pico builds
             sed -i 's/#define PICO_W/\/\/ #define PICO_W/' Pico-Green-Clock.c
             # Comment out the makefsdata script execution since it's WiFi-related
-            sed -i '/message.*makefsdata/,/^)$/s/^/# /' CMakeLists.txt
+            sed -i 's/message("Running makefsdata python script")/# message("Running makefsdata python script")/' CMakeLists.txt
+            sed -i 's/execute_process(COMMAND/# execute_process(COMMAND/' CMakeLists.txt
+            sed -i 's/        python makefsdata.py/# python makefsdata.py/' CMakeLists.txt
+            sed -i 's/        WORKING_DIRECTORY \${CMAKE_CURRENT_LIST_DIR}/# WORKING_DIRECTORY \${CMAKE_CURRENT_LIST_DIR}/' CMakeLists.txt
+            sed -i '/python makefsdata.py/,+2s/^)/# )/' CMakeLists.txt
             # Create empty html_files directory and minimal htmldata.c to prevent missing files
             mkdir -p html_files
             cat > htmldata.c << 'EOF'
