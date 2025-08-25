@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1732014248,
-        "narHash": "sha256-y/MEyuJ5oBWrWAic/14LaIr/u5E0wRVzyYsouYY3W6w=",
+        "lastModified": 1755615617,
+        "narHash": "sha256-HMwfAJBdrr8wXAkbGhtcby1zGFvs+StOp19xNsbqdOg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "23e89b7da85c3640bbc2173fe04f4bd114342367",
+        "rev": "20075955deac2583bb12f07151c2df830ef346b4",
         "type": "github"
       },
       "original": {
@@ -19,17 +19,17 @@
     "pico-sdk": {
       "flake": false,
       "locked": {
-        "lastModified": 1723125278,
-        "narHash": "sha256-fVSpBVmjeP5pwkSPhhSCfBaEr/FEtA82mQOe/cHFh0A=",
-        "ref": "refs/tags/2.0.0",
-        "rev": "efe2103f9b28458a1615ff096054479743ade236",
-        "revCount": 828,
+        "lastModified": 1732513469,
+        "narHash": "sha256-nLn6H/P79Jbk3/TIowH2WqmHFCXKEy7lgs7ZqhqJwDM=",
+        "ref": "refs/tags/2.1.0",
+        "rev": "95ea6acad131124694cda1c162c52cd30e0aece0",
+        "revCount": 984,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/raspberrypi/pico-sdk"
       },
       "original": {
-        "ref": "refs/tags/2.0.0",
+        "ref": "refs/tags/2.1.0",
         "submodules": true,
         "type": "git",
         "url": "https://github.com/raspberrypi/pico-sdk"
@@ -38,11 +38,11 @@
     "picotool": {
       "flake": false,
       "locked": {
-        "lastModified": 1725273585,
-        "narHash": "sha256-DM0YYuucur4zHsC4rX/z3mJO46lK2bQoDKpa9Jn6Ic0=",
+        "lastModified": 1754599029,
+        "narHash": "sha256-kIB/ODAvwWWoAQDq2cMiFuNWjzzLgPuRQv0NluWYU+Y=",
         "ref": "refs/heads/master",
-        "rev": "bf33c6ddd756c3961c7a13b000859b71e825ee74",
-        "revCount": 52,
+        "rev": "25aa087b2c517b4901874a99536e869d4d27b678",
+        "revCount": 176,
         "type": "git",
         "url": "https://github.com/raspberrypi/picotool.git"
       },

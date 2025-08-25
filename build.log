@@ -1,0 +1,54 @@
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/j3q3g8l0fh3hck2982mk4l5fhpjc1m9i-snn5bn72ysv9vds32pggncwj3q7wqdw7-source
+source root is snn5bn72ysv9vds32pggncwj3q7wqdw7-source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+[0mPICO_SDK_PATH is /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source[0m
+[0mTarget board (PICO_BOARD) is 'pico'.[0m
+[0mUsing board configuration from /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/src/boards/include/boards/pico.h[0m
+[0mDefaulting platform (PICO_PLATFORM) to 'rp2040' based on PICO_BOARD setting.[0m
+-- Defaulting build type to 'Release' since not specified.
+[0mDefaulting compiler (PICO_COMPILER) to 'pico_arm_cortex_m0plus_gcc' since not specified.[0m
+[0mConfiguring toolchain based on PICO_COMPILER 'pico_arm_cortex_m0plus_gcc'[0m
+[0mDefaulting PICO_GCC_TRIPLE to 'arm-none-eabi'[0m
+-- The C compiler identification is GNU 14.3.1
+-- The CXX compiler identification is GNU 14.3.1
+-- The ASM compiler identification is GNU
+-- Found assembler: /nix/store/r4ifcp74rrdxxgklznb6wrqziwyfd7kf-gcc-arm-embedded-14.3.rel1/bin/arm-none-eabi-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /nix/store/r4ifcp74rrdxxgklznb6wrqziwyfd7kf-gcc-arm-embedded-14.3.rel1/bin/arm-none-eabi-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /nix/store/r4ifcp74rrdxxgklznb6wrqziwyfd7kf-gcc-arm-embedded-14.3.rel1/bin/arm-none-eabi-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+[0mBuild type is Release[0m
+-- Found Python3: /nix/store/9yh9ak97gn659bk4d3n411fx6c0ng7s2-python3-3.13.5/bin/python3.13 (found version "3.13.5") found components: Interpreter
+[0mTinyUSB available at /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/lib/tinyusb/src/portable/raspberrypi/rp2040; enabling build support for USB.[0m
+[0mBTstack available at /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/lib/btstack[0m
+[0mcyw43-driver available at /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/lib/cyw43-driver[0m
+[0mlwIP available at /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/lib/lwip[0m
+[0mmbedtls available at /nix/store/7xscksngg26f9byhwmyxwrmia97yi9r7-source/lib/mbedtls[0m
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /build/snn5bn72ysv9vds32pggncwj3q7wqdw7-source/build
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
+[ 20%] [32mBuilding ASM object pico-sdk/src/rp2040/boot_stage2/CMakeFiles/bs2_default.dir/compile_time_choice.S.o[0m
+[ 40%] [32m[1mLinking ASM executable bs2_default.elf[0m
+[ 40%] Built target bs2_default
+[ 60%] [34m[1mGenerating bs2_default.bin[0m
+[ 80%] [34m[1mGenerating bs2_default_padded_checksummed.S[0m
+[100%] [32mBuilding ASM object pico-sdk/src/rp2040/boot_stage2/CMakeFiles/bs2_default_library.dir/bs2_default_padded_checksummed.S.o[0m
+[100%] Built target bs2_default_library
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+cp: cannot stat 'build/Pico-Green-Clock.elf': No such file or directory
