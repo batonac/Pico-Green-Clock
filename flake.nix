@@ -84,6 +84,10 @@
             # Remove WiFi-specific source files from add_executable line only
             sed -i 's/picow_ntp_client.c//' CMakeLists.txt
             sed -i 's/ssi.c cgi.c//' CMakeLists.txt
+            # Move pico_set_program_name and pico_set_program_version calls after add_executable
+            sed -i '/pico_set_program_name/d' CMakeLists.txt
+            sed -i '/pico_set_program_version/d' CMakeLists.txt
+            sed -i '/add_executable.*)/a\\npico_set_program_name(Pico-Green-Clock "Pico-Green-Clock")\\npico_set_program_version(Pico-Green-Clock "10.01")' CMakeLists.txt
             # Remove WiFi-specific libraries from target_link_libraries
             sed -i '/pico_cyw43_arch_lwip_threadsafe_background/d' CMakeLists.txt
             sed -i '/pico_lwip_http/d' CMakeLists.txt
@@ -97,7 +101,7 @@
             sed -i 's/message("Running makefsdata python script")/# message("Running makefsdata python script")/' CMakeLists.txt
             sed -i 's/execute_process(COMMAND/# execute_process(COMMAND/' CMakeLists.txt
             sed -i 's/        python makefsdata.py/# python makefsdata.py/' CMakeLists.txt
-            sed -i 's/        WORKING_DIRECTORY \${CMAKE_CURRENT_LIST_DIR}/# WORKING_DIRECTORY \${CMAKE_CURRENT_LIST_DIR}/' CMakeLists.txt
+            sed -i 's/        WORKING_DIRECTORY $'{CMAKE_CURRENT_LIST_DIR}'/# WORKING_DIRECTORY $'{CMAKE_CURRENT_LIST_DIR}'/' CMakeLists.txt
             sed -i '/python makefsdata.py/,+2s/^)/# )/' CMakeLists.txt
             # Create empty html_files directory and minimal htmldata.c to prevent missing files
             mkdir -p html_files
